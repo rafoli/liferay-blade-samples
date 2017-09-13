@@ -1,59 +1,74 @@
 package com.liferay.acceptance.test.page.object;
 
-import com.liferay.gs.testFramework.UtilsKeys;
+import java.util.List;
+
 import org.junit.Assert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+
+import com.liferay.gs.testFramework.UtilsKeys;
 
 /**
  * Created by Haysa on 07/06/17.
  */
 public class AngularMultiViewPage {
 
-    // Locators
+	// Locators
 
-    static final String PORTLET_NAME = ".//*[contains(@id,'portlet_AngularJSSimplePortlet_INSTANCE_')]";
+	static final String PORTLET_NAME = ".//*[contains(@id,'portlet_AngularJSSimplePortlet_INSTANCE_')]";
 
-    static final By angularPageTitle = By.xpath(PORTLET_NAME+"/div/h2");
+	static final By angularPageTitle = By.xpath(PORTLET_NAME + "/div/h2");
 
-    static final By sharedVarField1 = By.xpath(PORTLET_NAME+"/div/div/div/ui-view/div/input[1]");
-    static final By sharedVarField2 = By.xpath(PORTLET_NAME+"/div/div/div/ui-view/div/input[1]");
+	static List<WebElement> sharedVarField = null;
 
-    static final By nonSharedField1 = By.xpath(PORTLET_NAME+"/div/div/div/ui-view/div/input[2]");
-    static final By nonSharedField2 = By.xpath("");
+	static List<WebElement> nonSharedField = null;
 
+	// Actions
 
-    // Actions
+	public static void typeInSharedVarField1(String value) {
+		sharedVarField = UtilsKeys.DRIVER.findElements(By.xpath(".//input[@ng-model='sharedModel']"));
+		sharedVarField.get(0).sendKeys(value);
+	}
 
-    public static void typeInSharedVarField1(String value){
+	public static void validateSharedField2EqualToSharedField1(String value) {
+		sharedVarField = UtilsKeys.DRIVER.findElements(By.xpath(".//input[@ng-model='sharedModel']"));
+		sharedVarField.get(0).getAttribute("value");
+		Assert.assertEquals(value, sharedVarField.get(1).getAttribute("value").toString());
+	}
 
-        UtilsKeys.DRIVER.findElement(sharedVarField1).sendKeys(value);
-    }
+	public static void deleteValueInSharedField1() {
+		sharedVarField = UtilsKeys.DRIVER.findElements(By.xpath(".//input[@ng-model='sharedModel']"));
+		sharedVarField.get(0).clear();
+		Assert.assertEquals("", sharedVarField.get(1).getAttribute("value"));
+	}
 
-    public static void validateSharedField2EqualToSharedField1(String value){
+	public static void validateTitleInAngularViewPortlet() {
+		String text = UtilsKeys.DRIVER.findElement(angularPageTitle).getText();
+		Assert.assertEquals("AngularJS Simple Portlet", text);
+	}
 
-        WebElement element = UtilsKeys.DRIVER.findElement(sharedVarField2);
-        String i = element.getAttribute("value");
-        Assert.assertEquals(value, i);
+	public static void typeInNonSharedField1(String value) {
+		nonSharedField = UtilsKeys.DRIVER.findElements(By.xpath(".//input[@ng-model='nonSharedModel']"));
+		nonSharedField.get(0).clear();
+		nonSharedField.get(0).sendKeys(value);
+	}
 
-    }
+	public static void typeInNonSharedField2(String value) {
+		nonSharedField = UtilsKeys.DRIVER.findElements(By.xpath(".//input[@ng-model='nonSharedModel']"));
+		nonSharedField.get(1).clear();
+		nonSharedField.get(1).sendKeys(value);
+	}
 
-    public static void deleteValueInSharedField1() {
+	public static void validateNonSharedFieldsIsNotEqual() {
+		nonSharedField = UtilsKeys.DRIVER.findElements(By.xpath(".//input[@ng-model='nonSharedModel']"));
+		String nonSharedField1 = nonSharedField.get(0).getAttribute("value").toString();
+		String nonSharedField2 = nonSharedField.get(1).getAttribute("value").toString();
 
-        UtilsKeys.DRIVER.findElement(sharedVarField1).clear();
+		if (nonSharedField1.equalsIgnoreCase(nonSharedField2)) {
+			Assert.assertFalse(false);
+		} else {
+			Assert.assertTrue(true);
+		}
+	}
 
-        WebElement element = UtilsKeys.DRIVER.findElement(sharedVarField2);
-        String i = element.getAttribute("value");
-        Assert.assertEquals("", i);
-
-    }
-
-    public static void typeInNonSharedField1(String value){
-        UtilsKeys.DRIVER.findElement(nonSharedField1).sendKeys(value);
-    }
-
-    public static void validateTitleInAngularView(){
-        String text = UtilsKeys.DRIVER.findElement(angularPageTitle).getText();
-        Assert.assertEquals("AngularJS Simple Portlet", text);
-    }
 }

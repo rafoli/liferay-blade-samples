@@ -1,57 +1,52 @@
 package com.liferay.acceptance.test.steps;
 
-import com.liferay.gs.testFramework.UtilsKeys;
-import cucumber.api.Scenario;
-import cucumber.api.java.After;
-import cucumber.api.java.Before;
+import com.liferay.acceptance.test.page.object.AngularMultiViewPage;
+import com.liferay.acceptance.test.utils.CommonMethods;
+
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.TakesScreenshot;
-import com.liferay.acceptance.test.page.object.AngularMultiViewPage;
+import cucumber.api.java.en.When;
 
 /**
  * Created by Haysa on 07/06/17.
  */
 public class AngularMultiViews {
 
-    @Given("^I reach the angular multiple views$")
-    public void i_reach_the_angular_multiple_views() {
+	CommonMethods commonMethods = new CommonMethods();
 
-        AngularMultiViewPage.validateTitleInAngularView();
-    }
+	@Given("^I type in shared field (-?[^\"]*)$")
+	public void i_type_in_shared_field(String value) {
+		AngularMultiViewPage.typeInSharedVarField1(value);
+	}
 
-    @Given("^I type in shared field \"([^\"]*)\"$")
-    public void i_type_in_shared_field(String value) {
-        AngularMultiViewPage.typeInSharedVarField1(value);
-    }
+	@When("^I type in non shared field1 (-?[^\"]*)$")
+	public void i_type_in_non_shared_field1(String value) {
+		AngularMultiViewPage.typeInNonSharedField1(value);
+	}
 
-    @Then("^the shared field will be with value \"([^\"]*)\" replicated equally$")
-    public void the_shared_fields_will_be_with_values_replicated_equally(String value) {
-        AngularMultiViewPage.validateSharedField2EqualToSharedField1(value);
-    }
+	@When("^I type in non shared field2 (-?[^\"]*)$")
+	public void i_type_in_non_shared_field2(String value) {
+		AngularMultiViewPage.typeInNonSharedField2(value);
+	}
 
-    @And("^When I erase the value, the second field will be erased too$")
-    public void whenIEraseTheValueTheSecondFieldWillBeErasedToo() throws InterruptedException{
-        AngularMultiViewPage.deleteValueInSharedField1();
-    }
+	@Then("^the shared field will have the value (-?[^\"]*) replicated equally$")
+	public void the_shared_fields_will_have_the_values_replicated_equally(String value) {
+		AngularMultiViewPage.validateSharedField2EqualToSharedField1(value);
+	}
 
-    // Before and after hooks
+	@Then("^the shared field will have the blank value replicated equally$")
+	public void the_shared_fields_will_have_the_blank_value_replicated_equally() {
+		AngularMultiViewPage.validateSharedField2EqualToSharedField1("");
+	}
 
-    @Before
-    public void beforeScenarios(){
+	@Then("^the non shared field1 will have the value different from non shared field2$")
+	public void the_non_shared_field1_will_have_the_value_different_from_non_shared_field2() {
+		AngularMultiViewPage.validateNonSharedFieldsIsNotEqual();
+	}
 
-        UtilsKeys.DRIVER.get(UtilsKeys.getUrlToHome());
-    }
-
-    @After
-    public void afterScenarios(Scenario scenario){
-
-        if (scenario.isFailed()) {
-            byte[] screenshot = ((TakesScreenshot) UtilsKeys.DRIVER).getScreenshotAs(OutputType.BYTES);
-            scenario.embed(screenshot, "image/png");
-        }
-    }
-
+	@And("^I erase the value of the shared field$")
+	public void iEraseTheValueTheSharedField() {
+		AngularMultiViewPage.deleteValueInSharedField1();
+	}
 }
