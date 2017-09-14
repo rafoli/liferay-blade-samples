@@ -1,6 +1,7 @@
 configurations {
-    testFunctionalCompile.extendsFrom testCompile
-    testFunctionalRuntime.extendsFrom testRuntime
+    cucumberRuntime {
+        extendsFrom testRuntime
+    }
 }
 
 dependencies {
@@ -27,27 +28,59 @@ dependencies {
     testCompile group: "com.liferay.arquillian", name: "com.liferay.arquillian.arquillian-container-liferay", version: "1.0.6"
 	testCompile group: "org.jboss.arquillian.graphene", name: "graphene-webdriver", version: "2.1.0.Final"
 	testCompile group: "org.jboss.arquillian.junit", name: "arquillian-junit-container", version: "1.1.11.Final"
-    testFunctionalRuntime files("${jar.archivePath}")
 }
 
 startTestableTomcat {
 	checkTimeout = 10 * 60 * 1000
 }
 
+sourceSets {
+    testFunctional {
+        java {
+            compileClasspath += main.output + test.output
+            runtimeClasspath += main.output + test.output
+            srcDir file('src/testFunctional/java')
+        }
+        resources.srcDir file('src/testFunctional/resources')
+    }
+}
 
-task testFunctional(type: Test) {
+configurations {
+    testFunctionalCompile.extendsFrom testCompile
+    testFunctionalRuntime.extendsFrom testRuntime
+}
+
+task cucumberTest(type: Test) {
+    
+    description 'Runs the Cucumber Tests.'
+
     outputs.upToDateWhen { false }
 
-    dependsOn ":initBundle", startTestableTomcat, assemble, compileTestJava
+    testClassesDir = sourceSets.testFunctional.output.classesDir
+    classpath = sourceSets.testFunctional.runtimeClasspath
+    outputs.upToDateWhen { false }
 
-    dependsOn ":apps:angularjs:angularjs-hook:jar"
-    dependsOn ":apps:angularjs:angularjs-simple-portlet:jar"
+    dependsOn ":initBundle", startTestableTomcat, ":apps:angularjs:angularjs-hook:deploy", ":apps:angularjs:angularjs-simple-portlet:deploy"
 
-    doLast {
-        javaexec {
-            main = "cucumber.api.cli.Main"
-            classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
-            args = ['--format', 'html:cucumber-html-report', '-f', 'pretty', '--glue', 'com.liferay.acceptance.test.steps', "src/test/resources"]
+}
+
+tasks.withType(Test) {
+    testLogging {
+        events "passed", "skipped", "failed"
+        showExceptions true
+        exceptionFormat "full"
+        showCauses false
+        showStackTraces false
+
+        afterSuite { desc, result ->
+            if (!desc.parent) {
+                def output = "Results: ${result.resultType} (${result.testCount} tests, ${result.successfulTestCount} successes, ${result.failedTestCount} failures, ${result.skippedTestCount} skipped)"
+                def startItem = '|  ', endItem = '  |'
+                def repeatLength = startItem.length() + output.length() + endItem.length()
+                println('\n' + ('-' * repeatLength) + '\n' + startItem + output + endItem + '\n' + ('-' * repeatLength))
+            }
         }
     }
 }
+
+check.dependsOn cucumberTest
