@@ -1,3 +1,8 @@
+configurations {
+    testFunctionalCompile.extendsFrom testCompile
+    testFunctionalRuntime.extendsFrom testRuntime
+}
+
 dependencies {
 	compileOnly group: "com.liferay.portal", name: "com.liferay.portal.kernel", version: "2.0.0"
 	compileOnly group: "com.liferay.portal", name: "com.liferay.util.taglib", version: "2.0.0"
@@ -6,4 +11,43 @@ dependencies {
 	compileOnly group: "jstl", name: "jstl", version: "1.2"
 	compileOnly group: "org.osgi", name: "org.osgi.core", version: "6.0.0"
 	compileOnly group: "org.osgi", name: "org.osgi.service.component.annotations", version: "1.3.0"
+
+
+	testCompile 'com.liferay.gs:lfrgs-selenium-commons:1.0.4'
+    testCompile group: 'junit', name: 'junit', version:'4.12'
+    testCompile group: 'org.seleniumhq.selenium', name: 'selenium-api', version:'3.3.1'
+    testCompile group: 'org.seleniumhq.selenium', name: 'selenium-java', version:'3.3.1'
+    testCompile group: 'org.seleniumhq.selenium', name: 'selenium-remote-driver', version:'3.3.1'
+    testCompile group: 'org.seleniumhq.selenium', name: 'selenium-chrome-driver', version:'3.3.1'
+    testCompile group: 'org.seleniumhq.selenium', name: 'selenium-firefox-driver', version:'3.3.1'
+    testCompile group: 'org.seleniumhq.selenium', name: 'selenium-support', version:'3.3.1'
+    testCompile group: 'info.cukes', name: 'cucumber-junit', version:'1.2.5'
+    testCompile group: 'info.cukes', name: 'cucumber-java', version:'1.2.5'
+    testCompile group: 'com.vimalselvam', name: 'cucumber-extentsreport', version: '1.0.0'
+    testCompile group: "com.liferay.arquillian", name: "com.liferay.arquillian.arquillian-container-liferay", version: "1.0.6"
+	testCompile group: "org.jboss.arquillian.graphene", name: "graphene-webdriver", version: "2.1.0.Final"
+	testCompile group: "org.jboss.arquillian.junit", name: "arquillian-junit-container", version: "1.1.11.Final"
+    testFunctionalRuntime files("${jar.archivePath}")
+}
+
+startTestableTomcat {
+	checkTimeout = 10 * 60 * 1000
+}
+
+
+task testFunctional(type: Test) {
+    outputs.upToDateWhen { false }
+
+    dependsOn ":initBundle", startTestableTomcat, assemble, compileTestJava
+
+    dependsOn ":apps:angularjs:angularjs-hook:jar"
+    dependsOn ":apps:angularjs:angularjs-simple-portlet:jar"
+
+    doLast {
+        javaexec {
+            main = "cucumber.api.cli.Main"
+            classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
+            args = ['--format', 'html:cucumber-html-report', '-f', 'pretty', '--glue', 'com.liferay.acceptance.test.steps', "src/test/resources"]
+        }
+    }
 }
