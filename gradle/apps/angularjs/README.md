@@ -18,7 +18,7 @@ This sample is based on two projects:
 - [angularjs-hook](angularjs-hook): Loads AngularJS globally by overring core JSPs. To achieve that, the file [top_js-ext.jspf](angularjs-hook/src/main/resources/META-INF/jsps/html/common/themes/top_js-ext.jspf) ensures the right place to add the AngularJS framework.
 - [angularjs-simple-portlet](angularjs-simple-portlet): An example to demonstrate how to use AngularJS in a portlet, and making it instantiable.
 
-The [angularjs-hook](angularjs-hook) project provides a function to load bootstrap an AngularJS portlet. The following piece of code contains the bootstrap phase. Each portlet will be instantiable because it will be loaded using portletId as its [AngularJS module name](https://docs.angularjs.org/api/ng/function/angular.module).
+The [angularjs-hook](angularjs-hook) project provides a function to bootstrap an AngularJS portlet. The following piece of code contains the bootstrap phase. Each portlet will be instantiable because it will be loaded using its portletId as an unique [AngularJS module name](https://docs.angularjs.org/api/ng/function/angular.module).
 
 ```javascript
 ...
@@ -42,7 +42,7 @@ angular.portlet.add = function(portletName, angularFunction) {
 })(Liferay, angular);
 ```
 
-A [SharedService](angularjs-hook/src/main/resources/META-INF/resources/js/main.js#L29) module is also provided on it to allows shared models between AngularJS portlets, the following code demonstrates an input shared in any module that reuses the same model.
+A [SharedService](angularjs-hook/src/main/resources/META-INF/resources/js/main.js#L29) module is also provided on it that allows shared models between AngularJS portlets, the following code demonstrates an input shared with any module that reuses the same model.
 
 A model as a shared object:
 
@@ -55,7 +55,7 @@ $scope.sharedModel = function(value) {
       }
 ``` 
 
-A shared model as an input field:     
+The shared object in an input field:     
 
 ```html
 <span>Shared model:</span>
